@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
+	"github.com/gobuffalo/packr"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -175,15 +176,6 @@ func (t *TemplateSet) RestoreTemplateBundleFromDisk() error {
 
 func (t *TemplateSet) GatherTemplates() {
 
-	if UseStaticTemplateBundleFile == true {
-		err := t.RestoreTemplateBundleFromDisk()
-		if err != nil {
-			log.Println("Didn't find a template bundle from disk, will generate a new template bundle.")
-		} else {
-			return
-		}
-	}
-
 	bundle := NewTemplateBundle()
 
 	templatesPath := t.TemplateFilesPath
@@ -192,7 +184,36 @@ func (t *TemplateSet) GatherTemplates() {
 	}
 	bundle.importTemplateFileContents(templatesPath)
 	t.ImportTemplatesFromMap(bundle.Items())
-	t.bundle = bundle
+	if t.bundle == nil {
+		t.bundle = bundle
+	} else {
+		for k, v := range bundle.Items() {
+			t.bundle.items[k] = v
+		}
+	}
+
+	if StaticTemplateBundleFilePath != "" {
+		err := t.PersistTemplateBundleToDisk()
+		if err != nil {
+			log.Println("Failed to persist the template bundle to disk, in GatherTemplates, with error: ", err)
+		}
+	}
+
+}
+
+func (t *TemplateSet) GatherTemplatesFromPath(templatesPath string) {
+
+	bundle := NewTemplateBundle()
+
+	bundle.importTemplateFileContents(templatesPath)
+	t.ImportTemplatesFromMap(bundle.Items())
+	if t.bundle == nil {
+		t.bundle = bundle
+	} else {
+		for k, v := range bundle.Items() {
+			t.bundle.items[k] = v
+		}
+	}
 
 	if StaticTemplateBundleFilePath != "" {
 		err := t.PersistTemplateBundleToDisk()
@@ -204,10 +225,6 @@ func (t *TemplateSet) GatherTemplates() {
 }
 
 func (t *TemplateSet) GatherCogTemplates(cogTemplatePath string, prefixName string, templateFileExtension string) {
-
-	if ShouldBundleStaticAssets == false || UseStaticTemplateBundleFile == true {
-		return
-	}
 
 	bundle := NewTemplateBundle()
 
@@ -223,6 +240,30 @@ func (t *TemplateSet) GatherCogTemplates(cogTemplatePath string, prefixName stri
 		err := t.PersistTemplateBundleToDisk()
 		if err != nil {
 			log.Println("Failed to persist the template bundle to disk, in GatherCogTemplates, with error: ", err)
+		}
+	}
+
+}
+
+func (t *TemplateSet) GatherTemplatesFromPackrBox(box *packr.Box, path string) {
+
+	bundle := NewTemplateBundle()
+
+	bundle.importTemplateFileContentsFromBox(box, path)
+	t.ImportTemplatesFromMap(bundle.Items())
+
+	if t.bundle == nil {
+		t.bundle = bundle
+	} else {
+		for k, v := range bundle.Items() {
+			t.bundle.items[k] = v
+		}
+	}
+
+	if StaticTemplateBundleFilePath != "" {
+		err := t.PersistTemplateBundleToDisk()
+		if err != nil {
+			log.Println("Failed to persist the template bundle to disk, in GatherTemplates, with error: ", err)
 		}
 	}
 

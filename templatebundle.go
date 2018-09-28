@@ -6,6 +6,7 @@
 package isokit
 
 import (
+	"github.com/gobuffalo/packr"
 	"io/ioutil"
 	"log"
 	"os"
@@ -69,6 +70,36 @@ func (t *TemplateBundle) importTemplateFileContents(templatesPath string) error 
 				return err
 			}
 
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (t *TemplateBundle) importTemplateFileContentsFromBox(box *packr.Box, templatesPath string) error {
+
+	prefixPath := templatesPath
+
+	if prefixPath != "" {
+		prefixPath += "/"
+	}
+
+	if err := box.WalkPrefix(templatesPath, func(path string, file packr.File) error {
+
+		if strings.HasSuffix(path, TemplateFileExtension) {
+			name := strings.TrimSuffix(strings.TrimPrefix(path, prefixPath), TemplateFileExtension)
+
+			contents, err := ioutil.ReadAll(file)
+			if err != nil {
+				log.Println("error encountered while walking directory: ", err)
+				return err
+			}
+
+			t.items[name] = string(contents)
 		}
 		return nil
 	}); err != nil {
