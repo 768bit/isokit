@@ -6,6 +6,7 @@
 package isokit
 
 import (
+	"fmt"
 	"github.com/gobuffalo/packr"
 	"io/ioutil"
 	"log"
@@ -16,13 +17,15 @@ import (
 )
 
 type TemplateBundle struct {
-	items map[string]string
+	namespace string
+	items     map[string]string
 }
 
-func NewTemplateBundle() *TemplateBundle {
+func NewTemplateBundle(namespace string) *TemplateBundle {
 
 	return &TemplateBundle{
-		items: map[string]string{},
+		namespace: namespace,
+		items:     map[string]string{},
 	}
 
 }
@@ -50,11 +53,22 @@ func normalizeCogTemplateNameForWindows(path, templateDirectory, TemplateFileExt
 	return result
 }
 
+func (t *TemplateBundle) addItems(items map[string]string) {
+
+	for key, item := range items {
+		t.items[key] = item
+	}
+
+}
+
 func (t *TemplateBundle) importTemplateFileContents(templatesPath string) error {
 
 	templateDirectory := filepath.Clean(templatesPath)
 
+	fmt.Printf("Importing Templates from: %s\n", templatesPath)
+
 	if err := filepath.Walk(templateDirectory, func(path string, info os.FileInfo, err error) error {
+		fmt.Printf("Checking Template Path: %s\n", path)
 		if strings.HasSuffix(path, TemplateFileExtension) {
 			name := strings.TrimSuffix(strings.TrimPrefix(path, templateDirectory+"/"), TemplateFileExtension)
 
@@ -100,38 +114,6 @@ func (t *TemplateBundle) importTemplateFileContentsFromBox(box *packr.Box, templ
 			}
 
 			t.items[name] = string(contents)
-		}
-		return nil
-	}); err != nil {
-		return err
-	}
-
-	return nil
-
-}
-
-func (t *TemplateBundle) importTemplateFileContentsForCog(templatesPath string, prefixName string, templateFileExtension string) error {
-
-	templateDirectory := filepath.Clean(templatesPath)
-	RegisterStaticAssetsSearchPath(strings.Replace(templateDirectory, string(os.PathSeparator)+"templates", "", -1))
-	if err := filepath.Walk(templateDirectory, func(path string, info os.FileInfo, err error) error {
-		if strings.HasSuffix(path, templateFileExtension) {
-			name := strings.TrimSuffix(strings.TrimPrefix(path, templateDirectory), TemplateFileExtension)
-
-			if runtime.GOOS == "windows" {
-				name = normalizeCogTemplateNameForWindows(path, templateDirectory, TemplateFileExtension)
-				prefixName = "cog:"
-			}
-
-			name = prefixName + name
-			contents, err := ioutil.ReadFile(path)
-			t.items[name] = string(contents)
-
-			if err != nil {
-				log.Println("error encountered while walking directory: ", err)
-				return err
-			}
-
 		}
 		return nil
 	}); err != nil {

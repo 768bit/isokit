@@ -16,25 +16,33 @@ import (
 	"honnef.co/go/js/dom"
 )
 
+type TemplateType = int8
+
 const (
-	TemplateRegular = iota
-	TemplatePartial
-	TemplateLayout
+	TemplateRegular   TemplateType = 0x00
+	TemplatePartial   TemplateType = 0x01
+	TemplateView      TemplateType = 0x02
+	TemplateComponent TemplateType = 0x03
+	TemplateDialog    TemplateType = 0x04
+	TemplateForm      TemplateType = 0x05
+	TemplateLayout    TemplateType = 0x06
 )
 
 var (
-	PrefixNamePartial            = "partials/"
-	PrefixNameLayout             = "layouts/"
-	TemplateFileExtension        = ".tmpl"
-	TemplateFilesPath            = "./templates"
-	UseStaticTemplateBundleFile  = false
-	StaticTemplateBundleFilePath = ""
-	ShouldBundleStaticAssets     = true
+	PrefixNamePartial        = "partials/"
+	PrefixNameLayout         = "layouts/"
+	PrefixNameView           = "views/"
+	PrefixNameComponent      = "components/"
+	PrefixNameDialog         = "dialogs/"
+	PrefixNameForm           = "forms/"
+	TemplateFileExtension    = ".tmpl"
+	ShouldBundleStaticAssets = true
 )
 
 type Template struct {
 	*template.Template
-	templateType int8
+	Namespace    string
+	templateType TemplateType
 }
 
 const (
@@ -55,7 +63,7 @@ type RenderParams struct {
 	PageTitle                     string
 }
 
-func (t *Template) GetTemplateType() int8 {
+func (t *Template) GetTemplateType() TemplateType {
 
 	if t == nil {
 		return -1
@@ -78,6 +86,18 @@ func (t *Template) NameWithPrefix() string {
 	case TemplateLayout:
 		prefixName = PrefixNameLayout
 
+	case TemplateComponent:
+		prefixName = PrefixNameComponent
+
+	case TemplateDialog:
+		prefixName = PrefixNameDialog
+
+	case TemplateView:
+		prefixName = PrefixNameView
+
+	case TemplateForm:
+		prefixName = PrefixNameForm
+
 	}
 
 	if strings.HasPrefix(t.Name(), prefixName) {
@@ -85,6 +105,14 @@ func (t *Template) NameWithPrefix() string {
 	} else {
 		return prefixName + t.Name()
 	}
+
+}
+
+func (t *Template) NameWithNamespace() string {
+
+	prefixName := t.NameWithPrefix()
+
+	return t.Namespace + "/" + prefixName
 
 }
 
