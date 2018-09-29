@@ -6,7 +6,6 @@
 package isokit
 
 import (
-	"fmt"
 	"github.com/gobuffalo/packr"
 	"io/ioutil"
 	"log"
@@ -65,10 +64,7 @@ func (t *TemplateBundle) importTemplateFileContents(templatesPath string) error 
 
 	templateDirectory := filepath.Clean(templatesPath)
 
-	fmt.Printf("Importing Templates from: %s\n", templatesPath)
-
 	if err := filepath.Walk(templateDirectory, func(path string, info os.FileInfo, err error) error {
-		fmt.Printf("Checking Template Path: %s\n", path)
 		if strings.HasSuffix(path, TemplateFileExtension) {
 			name := strings.TrimSuffix(strings.TrimPrefix(path, templateDirectory+"/"), TemplateFileExtension)
 
