@@ -10,7 +10,7 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
-	"github.com/gobuffalo/packr"
+	"github.com/768bit/packr"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -27,6 +27,7 @@ type TemplateSet struct {
 	Funcs             template.FuncMap
 	bundle            *TemplateBundle
 	TemplateFilesPath string
+	binaryBundle      []byte
 }
 
 func NewTemplateSet() *TemplateSet {
@@ -163,7 +164,10 @@ func (t *TemplateSet) PersistTemplateBundleToDisk(bundlePath string) error {
 		if err != nil {
 			return err
 		}
-		err = ioutil.WriteFile(bundlePath, templateContentItemsBuffer.Bytes(), 0644)
+
+		t.binaryBundle = templateContentItemsBuffer.Bytes()
+
+		err = ioutil.WriteFile(bundlePath, t.binaryBundle, 0644)
 		if err != nil {
 			return err
 		} else {
@@ -201,6 +205,8 @@ func (t *TemplateSet) RestoreTemplateBundleFromBinary(bundle []byte) error {
 		return err
 	}
 
+	t.binaryBundle = templateBundleMapBuffer.Bytes()
+
 	for namespace, templateMap := range templateBundleMap {
 		bnd := NewTemplateBundle(namespace)
 		bnd.addItems(templateMap)
@@ -208,6 +214,12 @@ func (t *TemplateSet) RestoreTemplateBundleFromBinary(bundle []byte) error {
 	}
 
 	return nil
+}
+
+func (t *TemplateSet) GetTemplateBundleBinary() []byte {
+
+	return t.binaryBundle
+
 }
 
 func (t *TemplateSet) GatherTemplatesFromPath(namespace string, templatesPath string) error {

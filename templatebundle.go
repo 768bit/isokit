@@ -6,7 +6,7 @@
 package isokit
 
 import (
-	"github.com/gobuffalo/packr"
+	"github.com/768bit/packr"
 	"io/ioutil"
 	"log"
 	"os"
