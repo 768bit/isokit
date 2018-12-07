@@ -116,6 +116,7 @@ func (t *TemplateSet) ImportTemplatesFromMap(namespace string, bundle *TemplateB
 		tpl, err := template.New(name).Funcs(t.Funcs).Parse(templateContents)
 
 		if err != nil {
+			log.Println(templateContents)
 			log.Println("Encountered error when attempting to parse template: ", err)
 
 			return err
@@ -210,7 +211,10 @@ func (t *TemplateSet) RestoreTemplateBundleFromBinary(bundle []byte) error {
 	for namespace, templateMap := range templateBundleMap {
 		bnd := NewTemplateBundle(namespace)
 		bnd.addItems(templateMap)
-		t.ImportTemplatesFromMap(namespace, bnd)
+		err = t.ImportTemplatesFromMap(namespace, bnd)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
