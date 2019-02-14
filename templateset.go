@@ -146,6 +146,12 @@ func (t *TemplateSet) Render(templateURI string, params *RenderParams) error {
 
 }
 
+func (t *TemplateSet) RenderSimple(templateURI string, params interface{}) error {
+
+	return t.Members()[templateURI].RenderSimple(params)
+
+}
+
 func (t *TemplateSet) PersistTemplateBundleToDisk(bundlePath string) error {
 
 	dirPath := filepath.Dir(bundlePath)

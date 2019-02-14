@@ -116,6 +116,17 @@ func (t *Template) NameWithNamespace() string {
 
 }
 
+func (t *Template) RenderSimple(params interface{}) ([]byte, error) {
+
+	var tpl bytes.Buffer
+
+	if err := t.Execute(&tpl, params.Data); err != nil {
+		return nil, err
+	}
+
+	return tpl.Bytes(), nil
+}
+
 func (t *Template) Render(params *RenderParams) error {
 
 	if OperatingEnvironment() == ServerEnvironment && (params.Writer == nil) {
