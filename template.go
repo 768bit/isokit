@@ -120,7 +120,7 @@ func (t *Template) RenderSimple(params interface{}) ([]byte, error) {
 
 	var tpl bytes.Buffer
 
-	if err := t.Execute(&tpl, params.Data); err != nil {
+	if err := t.Execute(&tpl, params); err != nil {
 		return nil, err
 	}
 

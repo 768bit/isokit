@@ -146,7 +146,7 @@ func (t *TemplateSet) Render(templateURI string, params *RenderParams) error {
 
 }
 
-func (t *TemplateSet) RenderSimple(templateURI string, params interface{}) error {
+func (t *TemplateSet) RenderSimple(templateURI string, params interface{}) ([]byte, error) {
 
 	return t.Members()[templateURI].RenderSimple(params)
 
