@@ -6,13 +6,14 @@
 package isokit
 
 import (
-	"github.com/768bit/packr"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	packr "github.com/gobuffalo/packr/v2"
 )
 
 type TemplateBundle struct {

@@ -10,13 +10,14 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
-	"github.com/768bit/packr"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	packr "github.com/gobuffalo/packr/v2"
 )
 
 var CogStaticAssetsSearchPaths []string
